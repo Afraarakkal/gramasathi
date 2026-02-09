@@ -4,10 +4,9 @@ import html
 
 app = Flask(__name__)
 
-TWILIO_ACCOUNT_SID = "AC946d0ca47bb6d946459d87ccdb3b0746"
-TWILIO_AUTH_TOKEN = "72c6607245374e36341c14a3f0a3553d"
-
-COLAB_TRANSCRIBE_URL = "https://33b8-34-87-17-167.ngrok-free.app/transcribe"
+TWILIO_ACCOUNT_SID = "===="
+TWILIO_AUTH_TOKEN = "====="
+COLAB_TRANSCRIBE_URL = "https://=============.ngrok-free.app/transcribe"
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -68,3 +67,4 @@ def webhook():
 
 if __name__ == "__main__":
     app.run(port=5000)
+
