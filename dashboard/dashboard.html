@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<style>
+/* --- GENERAL LAYOUT --- */
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  display: flex;
+  height: 100vh;
+  background-color: #f4f6f8;
+  color: #333;
+  overflow: hidden;
+}
+.sidebar {
+  width: 25%;
+  background-color: #2c3e50;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+.admin-icon {
+  width: 70px; height: 70px; border-radius: 50%;
+  background: #34495e; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-weight: bold; font-size: 22px; margin-bottom: 20px;
+  transition: 0.3s;
+}
+.admin-icon:hover { background-color: #1abc9c; }
+.admin-details { display: none; margin-bottom: 20px; background-color: #3b4b5c; padding: 10px; border-radius: 8px; }
+.sidebar button {
+  background: #34495e; border: none; color: white; padding: 12px; margin-bottom: 10px;
+  cursor: pointer; border-radius: 6px; text-align: left; font-size: 16px; transition: 0.3s;
+}
+.sidebar button:hover { background-color: #1abc9c; }
+.sidebar button.logout-btn { background-color: #e74c3c; margin-top: auto; }
+.sidebar button.logout-btn:hover { background-color: #c0392b; }
+
+/* --- MAIN AREA --- */
+.main {
+  width: 75%;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background-color: #ecf0f1;
+}
+.top-bar {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.print-btn {
+  background: #3498db; border: none; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer;
+}
+.print-btn:hover { background: #2980b9; }
+
+/* --- BOXES --- */
+.top-boxes { display: flex; gap: 15px; margin-bottom: 20px; }
+.box {
+  background: white; flex: 1; padding: 15px; border-radius: 8px; text-align: center;
+  font-size: 18px; font-weight: bold; color: #34495e; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.main-chart, .main-table, .recent-applicants, .pie-chart {
+  background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1); border: 1px solid #ddd;
+}
+table {
+  width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden;
+}
+th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+th { background-color: #1abc9c; color: white; }
+tr:nth-child(even) { background-color: #f9f9f9; }
+tr:hover { background-color: #eafaf1; cursor: pointer; }
+
+/* --- DETAIL VIEW --- */
+.detail-view {
+  background: white; padding: 20px; border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.detail-view button {
+  margin-right: 10px; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;
+}
+.back-btn { background: #2c3e50; color: white; }
+.download-btn { background: #27ae60; color: white; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="admin-icon" onclick="toggleAdminDetails()">A</div>
+  <div class="admin-details" id="adminDetails">
+    <h2>Admin: Aswin</h2>
+    <p>ID: ADM001</p>
+    <p>Email: admin@example.com</p>
+    <p>Role: Super Admin</p>
+  </div>
+  <button onclick="showDashboard()">🏠 Dashboard</button>
+  <button onclick="showTable()">📋 Applicants Table</button>
+  <button onclick="showChart()">📊 Cases Chart</button>
+
+  <!-- ✅ ONLY ADDED BUTTON -->
+  <button onclick="openIOSMap()">🗺 iOS Map</button>
+
+  <button class="logout-btn" onclick="logout()">🔒 Logout</button>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="top-bar">
+    <h2>Admin Dashboard</h2>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboardContent">
+    <div class="top-boxes">
+      <div class="box" id="totalUsersBox">Total Users<br>0</div>
+      <div class="box" id="activeCasesBox">Active<br>0</div>
+      <div class="box" id="processingCasesBox">Processing<br>0</div>
+      <div class="box" id="inactiveCasesBox">Inactive<br>0</div>
+    </div>
+
+    <div class="main-chart">
+      <h3>Case Trends (Bar Graph)</h3>
+      <canvas id="dashboardChart"></canvas>
+    </div>
+
+    <div class="recent-applicants">
+      <h3>Recent Applicants (Last 10)</h3>
+      <table id="recentApplicantsTable">
+        <thead>
+          <tr><th>Name</th><th>Phone Number</th><th>Service Type</th><th>Status</th></tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot id="summaryRow"></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Applicants Table -->
+  <div id="tableContent" style="display:none;">
+    <h3>Applicants Table</h3>
+    <table id="applicantTable">
+      <thead>
+        <tr><th>Name</th><th>Phone Number</th><th>Service Type</th><th>Status</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Chart Section -->
+  <div id="chartContent" style="display:none;">
+    <h3>Case Distribution (Pie Chart)</h3>
+    <div class="pie-chart"><canvas id="casesPieChart"></canvas></div>
+  </div>
+
+  <!-- Detail View -->
+  <div id="detailView" style="display:none;" class="detail-view">
+    <button class="back-btn" onclick="showTable()">← Back</button>
+    <h3>Applicant Details</h3>
+    <div id="detailContent"></div><br>
+    <button class="download-btn" onclick="downloadDetails()">⬇ Download</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print</button>
+  </div>
+</div>
+
+<script>
+ 
+  const firebaseConfig = {
+    apiKey: "AIzaSyDawJiJHluSmHIMi0E7o-XX5sRnw4KUoyE",
+    authDomain: "gramasathi.firebaseapp.com",
+    projectId: "gramasathi",
+    storageBucket: "gramasathi.firebasestorage.app",
+    messagingSenderId: "514390867763",
+    appId: "1:514390867763:web:b8c743b2a8215b8ffcc846",
+    measurementId: "G-QZXJ7WW54B"
+  };
+
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+firebase.auth().onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "login.html";
+  }
+  else{
+    loadSchemaData();
+  }
+});
+
+
+let servicesData = [];
+
+async function loadSchemaData() {
+  servicesData = [];
+
+  const usersSnap = await db.collection("users").get();
+  const tasksSnap = await db.collection("tasks").get();
+
+  const usersMap = {};
+  usersSnap.forEach(doc => {
+    usersMap[doc.id] = doc.data();
+  });
+
+  tasksSnap.forEach(doc => {
+    const task = doc.data();
+    const user = usersMap[task.userId];
+
+    if (!user) return;
+
+    servicesData.push({
+      name: user.name || "N/A",
+      phone_number: user.phone || "N/A",
+      service_type: task.title,
+      status: mapStatus(task.status),
+      createdAt: task.createdAt?.toDate?.() || new Date()
+    });
+  });
+
+  // sort by latest
+  servicesData.sort((a, b) => b.createdAt - a.createdAt);
+
+  populateApplicantsTable();
+  populateDashboard();
+  populateRecentApplicants();
+  drawDashboardChart();
+  drawPieChart();
+}
+
+
+function populateApplicantsTable() {
+  const tbody = document.querySelector('#applicantTable tbody');
+  tbody.innerHTML = "";
+  servicesData.forEach((a, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${a.name}</td><td>${a.phone_number}</td><td>${a.service_type}</td><td>${a.status}</td>`;
+    tr.onclick = () => showDetails(i);
+    tbody.appendChild(tr);
+  });
+}
+
+function populateDashboard() {
+  const total = servicesData.length;
+  const active = servicesData.filter(x => x.status === "Active").length;
+  const processing = servicesData.filter(x => x.status === "Processing").length;
+  const inactive = servicesData.filter(x => x.status === "Not Active" || x.status === "Canceled").length;
+  document.getElementById('totalUsersBox').innerHTML = `Total Users<br>${total}`;
+  document.getElementById('activeCasesBox').innerHTML = `Active<br>${active}`;
+  document.getElementById('processingCasesBox').innerHTML = `Processing<br>${processing}`;
+  document.getElementById('inactiveCasesBox').innerHTML = `Inactive<br>${inactive}`;
+}
+
+function populateRecentApplicants() {
+  const tbody = document.querySelector('#recentApplicantsTable tbody');
+  const recent = servicesData.slice(-10);
+  tbody.innerHTML = recent.map(a =>
+    `<tr><td>${a.name}</td><td>${a.phone_number}</td><td>${a.service_type}</td><td>${a.status}</td></tr>`
+  ).join('');
+
+  const active = servicesData.filter(a => a.status === "Active").length;
+  const processing = servicesData.filter(a => a.status === "Processing").length;
+  const finished = servicesData.filter(a => a.status === "Not Active").length;
+  document.getElementById('summaryRow').innerHTML =
+    `<tr><td colspan="4"><b>Active:</b> ${active}, <b>Processing:</b> ${processing}, <b>Finished:</b> ${finished}</td></tr>`;
+}
+
+function drawDashboardChart() {
+  const ctx = document.getElementById('dashboardChart').getContext('2d');
+  const statuses = ["Active", "Processing", "Not Active", "Canceled"];
+  const counts = statuses.map(s => servicesData.filter(x => x.status === s).length);
+  new Chart(ctx, {
+    type: 'bar',
+    data: { labels: statuses, datasets: [{ data: counts, backgroundColor: ['#2ecc71','#f1c40f','#e74c3c','#95a5a6'] }] },
+    options: { plugins: { legend: { display: false } } }
+  });
+}
+
+function drawPieChart() {
+  const ctx = document.getElementById('casesPieChart').getContext('2d');
+  const statuses = ["Active", "Processing", "Not Active", "Canceled"];
+  const counts = statuses.map(s => servicesData.filter(x => x.status === s).length);
+  new Chart(ctx, {
+    type: 'pie',
+    data: { labels: statuses, datasets: [{ data: counts, backgroundColor: ['#27ae60','#f39c12','#95a5a6','#c0392b'] }] }
+  });
+}
+
+function showDetails(index) {
+  const a = servicesData[index];
+  document.getElementById('tableContent').style.display = 'none';
+  document.getElementById('detailView').style.display = 'block';
+  document.getElementById('detailContent').innerHTML = `
+    <p><b>Name:</b> ${a.name}</p>
+    <p><b>Phone:</b> ${a.phone_number}</p>
+    <p><b>Service:</b> ${a.service_type}</p>
+    <p><b>Status:</b> ${a.status}</p>`;
+}
+
+function downloadDetails() {
+  const data = document.getElementById('detailContent').innerText;
+  const blob = new Blob([data], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'applicant_details.txt';
+  a.click();
+}
+
+/* NAVIGATION */
+function toggleAdminDetails() {
+  const el = document.getElementById('adminDetails');
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+function showDashboard() {
+  hideAll(); document.getElementById('dashboardContent').style.display = 'block';
+}
+function showTable() {
+  hideAll(); document.getElementById('tableContent').style.display = 'block';
+}
+function showChart() {
+  hideAll(); document.getElementById('chartContent').style.display = 'block';
+}
+function hideAll() {
+  ['dashboardContent','tableContent','chartContent','detailView'].forEach(id =>
+    document.getElementById(id).style.display = 'none'
+  );
+}
+function logout() {
+  firebase.auth().signOut()
+    .then(() => {
+      window.location.href = "login.html";
+    })
+    .catch(err => {
+      console.error("Logout failed:", err);
+      alert("Logout failed. Try again.");
+    });
+}
+
+
+
+function openIOSMap() {
+  window.open("https://leafletjs.com/index.html", "_blank");
+}
+function mapStatus(status) {
+  if (status === "pending") return "Processing";
+  if (status === "completed") return "Not Active";
+  return "Active";
+}
+
+
+</script>
+</body>
+</html>
