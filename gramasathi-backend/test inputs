@@ -1,0 +1,23 @@
+{
+  "name": "Fazal Rahman Manat",
+  "email": "fazal@example.com",
+  "phone": "9876543210",
+  "address": "Malappuram, Kerala",
+  "complaint": "Testing automated form filling."
+}
+
+
+VDelCWO3jpmiRmjyWzUw
+{
+  "userId": "VDelCWO3jpmiRmjyWzUw",
+  "title": "Sample Form Automation",
+  "formLink": "http://127.0.0.1:5500/form1.html",
+  "selectors": {
+    "name": "#fullName",
+    "email": "#emailInput",
+    "phone": "#phoneInput",
+    "address": "#addressInput",
+    "complaint": "#complaintField",
+    "submit": "#submitBtn"
+  }
+}

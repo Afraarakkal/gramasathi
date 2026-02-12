@@ -1,0 +1,11 @@
+# Secrets
+.env
+serviceAccountKey.json
+gramasathi-backend/serviceAccountKey.json
+
+# Node
+node_modules/
+
+# Logs
+*.log
+
