@@ -123,16 +123,13 @@ app.patch("/messages/:id/status", async (req, res) => {
   }
 });
 
-// -------------------------
-// TASKS (auto form automation + PDFs + flexible form)
-// -------------------------
 app.post("/tasks", async (req, res) => {
   try {
     const { userId, title, formLink, selectors } = req.body;
     if (!userId || !title || !formLink)
       return res.status(400).send({ error: "userId, title, formLink required" });
 
-    // Load user
+    // Load user data
     const userSnap = await db.collection("users").doc(userId).get();
     if (!userSnap.exists) return res.status(404).send({ error: "User not found" });
     const user = userSnap.data();
@@ -147,104 +144,122 @@ app.post("/tasks", async (req, res) => {
     });
 
     // Launch Puppeteer
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox"] });
     const page = await browser.newPage();
-    await page.goto(formLink, { waitUntil: "networkidle2" });
 
-    // Fallback auto-detection
-    async function autoDetectSelectors(page) {
-      const guessed = {};
-      const inputs = await page.$$eval("input, textarea, select", els =>
-        els.map(el => ({
-          name: el.getAttribute("name") || "",
-          id: el.id || "",
-          placeholder: el.getAttribute("placeholder") || "",
-        }))
-      );
-      for (const f of inputs) {
-        const str = (f.name + f.id + f.placeholder).toLowerCase();
-        if (str.includes("name")) guessed[f.id] = "#" + f.id;
-        else if (str.includes("mail")) guessed[f.id] = "#" + f.id;
-        else if (str.includes("phone") || str.includes("mobile")) guessed[f.id] = "#" + f.id;
-        else if (str.includes("address")) guessed[f.id] = "#" + f.id;
-        else if (str.includes("complaint") || str.includes("desc")) guessed[f.id] = "#" + f.id;
-      }
-      guessed.submit = "button[type='submit'], input[type='submit']";
-      return guessed;
+    // Support file:// or http:// URLs
+    let url = formLink;
+    if (!/^https?:\/\//.test(formLink)) {
+      url = `file://${path.isAbsolute(formLink) ? formLink : path.join(__dirname, formLink)}`;
+    }
+    await page.goto(url, { waitUntil: "networkidle2" });
+
+    // Fallback auto-detection of selectors
+    let sel = mappings[formLink] || selectors || {};
+    if (Object.keys(sel).length === 0) {
+      sel = await page.$$eval("input, textarea, select", els => {
+        const guessed = {};
+        els.forEach(el => {
+          const id = el.id || "";
+          guessed[id] = id ? "#" + id : null;
+          if (el.type === "submit") guessed.submit = "#" + id;
+        });
+        guessed.submit ||= "button[type='submit'], input[type='submit']";
+        return guessed;
+      });
     }
 
-    // Merge selectors: mappings > request body > fallback
-    let sel = mappings[formLink] || selectors || {};
-    if (Object.keys(sel).length === 0) sel = await autoDetectSelectors(page);
-
-    // Safe typing for all fields in user
+    // Fill all user fields
     for (const [field, value] of Object.entries(user)) {
       const selector = sel[field] || sel[field.toLowerCase()] || sel[field + "Input"];
-      if (selector && value) {
-        try {
-          await page.waitForSelector(selector, { timeout: 2000 });
+      if (!selector || value === undefined || value === null) continue;
+
+      try {
+        await page.waitForSelector(selector, { timeout: 2000 });
+        const tagName = await page.$eval(selector, el => el.tagName.toLowerCase());
+        const type = await page.$eval(selector, el => el.type?.toLowerCase() || "");
+
+        // Text / email / tel inputs
+        if (tagName === "input" && ["text", "email", "tel"].includes(type)) {
           await page.focus(selector);
-          await page.evaluate((s) => { document.querySelector(s).value = ""; }, selector);
-          await page.type(selector, String(value));
-        } catch (err) {
-          console.warn(`Could not type into field ${field}: ${err.message}`);
+          await page.evaluate(s => document.querySelector(s).value = "", selector);
+          await page.type(selector, String(value), { delay: 50 });
         }
+        // Textarea
+        else if (tagName === "textarea") {
+          await page.focus(selector);
+          await page.evaluate(s => document.querySelector(s).value = "", selector);
+          await page.type(selector, String(value), { delay: 50 });
+        }
+        // Single dropdown
+        else if (tagName === "select") {
+          await page.select(selector, String(value));
+        }
+        // Checkbox group (array)
+        else if (type === "checkbox" && Array.isArray(value)) {
+          for (const v of value) {
+            const box = await page.$(`input[name='${field}'][value='${v}']`);
+            if (box) await box.click();
+          }
+        }
+        // Single checkbox (boolean)
+        else if (type === "checkbox") {
+          const isChecked = await page.$eval(selector, el => el.checked);
+          if (Boolean(value) !== isChecked) await page.click(selector);
+        }
+        // Radio buttons
+        else if (type === "radio") {
+          const option = await page.$(`input[name='${field}'][value='${value}']`);
+          if (option) await option.click();
+        } 
+        else {
+          console.warn(`Skipping unknown field type for ${field}: ${tagName}/${type}`);
+        }
+      } catch (err) {
+        console.warn(`Could not fill field ${field}: ${err.message}`);
       }
     }
 
     // Before-submit PDF
+    const beforePdfPath = path.join(__dirname, `${taskRef.id}_before.pdf`);
     const beforePdf = await page.pdf({ format: "A4" });
-    const beforePath = path.join(__dirname, "before.pdf");
-    fs.writeFileSync(beforePath, beforePdf);
+    fs.writeFileSync(beforePdfPath, beforePdf);
 
-// --- Submit and wait intelligently ---
-if (sel.submit) {
-  try {
-    const navigationPromise = page.waitForNavigation({ waitUntil: "load", timeout: 5000 }).catch(() => null);
+    // Submit safely
+    if (sel.submit) {
+      try {
+        const navPromise = page.waitForNavigation({ waitUntil: "load", timeout: 5000 }).catch(() => null);
+        const dialogPromise = new Promise(resolve => {
+          page.once("dialog", async d => { await d.dismiss(); resolve(true); });
+        });
+        await page.click(sel.submit);
+        await Promise.race([navPromise, dialogPromise, new Promise(r => setTimeout(r, 2000))]);
+      } catch (err) {
+        console.warn("Submit skipped or failed:", err.message);
+      }
+    }
 
-    // Click the button and handle alerts automatically
-    const dialogPromise = new Promise(resolve => {
-      page.once("dialog", async dialog => {
-        await dialog.dismiss();
-        resolve(true);
-      });
-    });
-
-    await page.click(sel.submit);
-
-    // Wait for whichever happens first — navigation, alert, or short timeout
-    await Promise.race([
-      navigationPromise,
-      dialogPromise,
-      await new Promise(resolve => setTimeout(resolve, 2000))
-    ]);
-  } catch (err) {
-    console.warn("Submit action skipped or failed:", err.message);
-  }
-}
-
-// --- After-submit PDF ---
-await new Promise(resolve => setTimeout(resolve, 2000));
-const afterPdf = await page.pdf({ format: "A4" });
-const afterPath = path.join(__dirname, "after.pdf");
-fs.writeFileSync(afterPath, afterPdf);
-
+    // After-submit PDF
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    const afterPdfPath = path.join(__dirname, `${taskRef.id}_after.pdf`);
+    const afterPdf = await page.pdf({ format: "A4" });
+    fs.writeFileSync(afterPdfPath, afterPdf);
 
     await browser.close();
 
-    // Update task
+    // Update task status
     await taskRef.update({
       status: "completed",
       completedAt: Timestamp.now(),
     });
 
-    // Return download links
+    // Return task info
     res.status(200).send({
       message: "Task completed",
       taskId: taskRef.id,
       pdfs: {
-        before: `/files/before.pdf`,
-        after: `/files/after.pdf`
+        before: `/files/${taskRef.id}_before.pdf`,
+        after: `/files/${taskRef.id}_after.pdf`
       }
     });
 
@@ -253,6 +268,9 @@ fs.writeFileSync(afterPath, afterPdf);
     res.status(500).send({ error: error.message });
   }
 });
+
+
+
 
 
 // -------------------------
