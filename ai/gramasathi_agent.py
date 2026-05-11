@@ -14,9 +14,13 @@ from google import genai
 
 load_dotenv()
 API_KEY = os.getenv("GOOGLE_API_KEY")
+BACKEND_URL = os.getenv("BACKEND_URL")  # e.g. https://your-backend.up.railway.app/ai-response
 
 if not API_KEY:
-    raise ValueError("GOOGLE_API_KEY not found in .env")
+    raise ValueError("GOOGLE_API_KEY not found in environment variables")
+
+if not BACKEND_URL:
+    raise ValueError("BACKEND_URL not found in environment variables")
 
 client = genai.Client(api_key=API_KEY)
 app = Flask(__name__)
@@ -35,10 +39,6 @@ intent_df.columns = intent_df.columns.str.strip().str.lower()
 # =====================================================
 
 user_sessions = {}
-
-# =====================================================
-# 🔁 BACKEND INTENT MAPPING (VERY IMPORTANT)
-# =====================================================
 
 # =====================================================
 # 🗣 USER FRIENDLY FIELD LABELS (Malayalam)
@@ -135,11 +135,7 @@ You serve with patience and dignity.
     return None
 
 
-import re
-
 def validate_field(field_name, value):
-
-    # Remove everything except digits
     cleaned_value = re.sub(r"\D", "", value)
 
     if field_name == "phone":
@@ -226,34 +222,28 @@ def analyze():
 
         for field in required_fields:
             if field not in session["user_data"]:
-
                 session["pending_field"] = field
-
-        # convert variable name → Malayalam label
                 label = FIELD_LABELS.get(field, field)
-
                 return jsonify({
-                "reply_to_user": f"ദയവായി നിങ്ങളുടെ {label} നൽകാമോ?"
+                    "reply_to_user": f"ദയവായി നിങ്ങളുടെ {label} നൽകാമോ?"
                 })
 
         # -----------------------------------------
-        # 5️⃣ All fields collected → Send to backend
+        # 5️⃣ All fields collected → Send to backend (Railway URL)
         # -----------------------------------------
 
-        mapped_intent = intent
-    
-
         final_json = {
-            "intent": mapped_intent,
+            "intent": intent,
             "user_data": session["user_data"],
             "confidence": 0.95,
             "ticket_id": str(uuid.uuid4())
         }
 
-        print("📡 Sending to backend:", final_json)
+        print(f"📡 Sending to backend at: {BACKEND_URL}")
+        print("📦 Payload:", final_json)
 
         backend_response = requests.post(
-            "http://127.0.0.1:3000/ai-response",
+            BACKEND_URL,
             json=final_json,
             timeout=15
         )
@@ -261,7 +251,7 @@ def analyze():
         backend_json = {}
         try:
             backend_json = backend_response.json()
-        except:
+        except Exception:
             backend_json = {"raw_response": backend_response.text}
 
         # Reset session after completion
@@ -279,8 +269,9 @@ def analyze():
 
 
 # =====================================================
-# ▶ RUN SERVER
+# ▶ RUN SERVER (Railway compatible)
 # =====================================================
 
 if __name__ == "__main__":
-    app.run(port=6000, debug=True)
+    port = int(os.environ.get("PORT", 6000))
+    app.run(host="0.0.0.0", port=port, debug=False)
