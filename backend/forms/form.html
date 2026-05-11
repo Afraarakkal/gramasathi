@@ -1,0 +1,32 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sample Complaint Form</title>
+</head>
+<body>
+  <h2>Sample Pension Form</h2>
+  <form action="/submit_pension_query" method="POST">
+
+  <label for="name">Full Name:</label><br>
+  <input type="text" id="name" name="name" required minlength="3"><br><br>
+
+  <label for="aadhaar_number">Aadhaar Number:</label><br>
+  <input type="text" id="aadhaar_number" name="aadhaar_number"
+         pattern="\d{12}" maxlength="12" required
+         title="Enter 12-digit Aadhaar number"><br><br>
+
+  <label for="phone">Phone Number:</label><br>
+  <input type="text" id="phone" name="phone"
+         pattern="\d{10}" maxlength="10" required
+         title="Enter 10-digit phone number"><br><br>
+
+  <button type="submit">Submit Pension Query</button>
+
+</form>
+
+  
+</body>
+</html>

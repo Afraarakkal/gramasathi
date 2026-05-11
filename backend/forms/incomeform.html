@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Income Certificate Application</title>
+<style>
+body { font-family: Arial; padding: 20px; }
+.container { max-width: 900px; margin: auto; }
+input, textarea {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid black;
+    margin: 10px 0;
+}
+.row { display: flex; gap: 10px; }
+.row input { flex: 1; }
+h2, h3 { text-align: center; }
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h2>APPLICATION FORM - INCOME CERTIFICATE</h2>
+
+<h3>Applicant Details</h3>
+
+<label>Applicant Name</label>
+<input type="text" id="name">
+
+<label>Father / Husband Name</label>
+<input type="text" id="father_name">
+
+<div class="row">
+<input type="text" id="dob" placeholder="Date of Birth">
+<input type="text" id="gender" placeholder="Gender">
+</div>
+
+<label>Aadhaar Number</label>
+<input type="text" id="aadhaar_number">
+
+<label>House / Flat Number</label>
+<input type="text" id="house_number">
+
+<label>Village / Sector</label>
+<input type="text" id="village">
+
+<div class="row">
+<input type="text" id="tehsil" placeholder="Tehsil / Sub District">
+<input type="text" id="district" placeholder="District">
+</div>
+
+<div class="row">
+<input type="text" id="state" placeholder="State">
+<input type="text" id="pin_code" placeholder="Pin Code">
+</div>
+
+<label>Mobile Number</label>
+<input type="text" id="phone">
+
+<label>Email</label>
+<input type="email" id="email">
+
+<h3>Purpose Details</h3>
+
+<label>Purpose of Certificate</label>
+<input type="text" id="purpose">
+
+<label>Reason for Applying</label>
+<input type="text" id="reason">
+
+<label>Gross Annual Family Income</label>
+<input type="text" id="income">
+
+<h3>Loan Details (if applicable)</h3>
+
+<input type="text" id="financial_year" placeholder="Financial Year">
+<input type="text" id="bank_name" placeholder="Bank Name">
+<input type="text" id="college" placeholder="College / Institute Name">
+<input type="text" id="course" placeholder="Course Name">
+<input type="text" id="duration" placeholder="Duration">
+<input type="text" id="session" placeholder="Session">
+
+<h3>Self Declaration</h3>
+
+<textarea id="declaration" rows="4"></textarea>
+
+<div class="row">
+<input type="text" id="date" placeholder="Date">
+<input type="text" id="place" placeholder="Place">
+</div>
+
+<label>Signature</label>
+<input type="text" id="signature">
+
+<br><br>
+<button type="submit" id="submit">Submit</button>
+
+</div>
+</body>
+</html>

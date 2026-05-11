@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complex Registration / Complaint Form</title>
+</head>
+<body>
+  <h2>Complex Complaint / Registration Form</h2>
+  <form id="complexForm">
+
+    <!-- Personal Info -->
+    <fieldset>
+      <legend>Personal Information</legend>
+      <label for="fullName">Full Name:</label><br/>
+      <input type="text" id="fullName" placeholder="Enter full name" /><br/><br/>
+
+      <label for="emailInput">Email:</label><br/>
+      <input type="email" id="emailInput" placeholder="Enter email" /><br/><br/>
+
+      <label for="phoneInput">Phone Number:</label><br/>
+      <input type="tel" id="phoneInput" placeholder="Enter phone number" /><br/><br/>
+    </fieldset>
+
+    <!-- Address Info -->
+    <fieldset>
+      <legend>Address</legend>
+      <label for="addressInput">Address:</label><br/>
+      <textarea id="addressInput" placeholder="Enter address"></textarea><br/><br/>
+
+      <label for="stateSelect">State:</label><br/>
+      <select id="stateSelect">
+        <option value="">--Select State--</option>
+        <option value="Kerala">Kerala</option>
+        <option value="Tamil Nadu">Tamil Nadu</option>
+        <option value="Karnataka">Karnataka</option>
+      </select><br/><br/>
+
+      <label for="citySelect">City:</label><br/>
+      <select id="citySelect">
+        <option value="">--Select City--</option>
+        <option value="Malappuram">Malappuram</option>
+        <option value="Kozhikode">Kozhikode</option>
+      </select><br/><br/>
+    </fieldset>
+
+    <!-- Complaint Info -->
+    <fieldset>
+      <legend>Complaint / Feedback</legend>
+      <label for="complaintField">Complaint:</label><br/>
+      <textarea id="complaintField" placeholder="Describe your complaint"></textarea><br/><br/>
+
+      <label>Priority:</label><br/>
+      <input type="radio" name="priority" value="Low" /> Low
+      <input type="radio" name="priority" value="Medium" /> Medium
+      <input type="radio" name="priority" value="High" /> High<br/><br/>
+
+      <label>Options:</label><br/>
+      <input type="checkbox" name="options" value="Option1" /> Option 1
+      <input type="checkbox" name="options" value="Option2" /> Option 2
+      <input type="checkbox" name="options" value="Option3" /> Option 3<br/><br/>
+    </fieldset>
+
+    <button id="submitBtn" type="submit">Submit</button>
+  </form>
+</body>
+</html>

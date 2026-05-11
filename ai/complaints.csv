@@ -1,0 +1,8 @@
+ComplaintID,Name,HouseNo,Complaint,DateTime
+KWA115722,ഫാതിമ,22,ഞങ്ങളുടെ വഴിയിൽ വെള്ളം വരുന്നില്ല,2025-08-05 11:57:22.677493
+KWA115858,richu bhai,34,കുടിവെള്ളം കിട്ടുന്നില്ല,2025-08-05 11:58:58.162580
+widow_pension_application,"{'applicant_name': 'Ashwin V. Sandosh', 'applicant_age': '25', 'husband_name': 'Fasal', 'aadhar_number': '62486323548', 'panchayath': 'Ella Valli'}",0.95,0ed6b735-e2aa-4c91-b39a-ad0c0ca97c69
+apply_widow_pension,"{'applicant_name': 'Faisal Anwar', 'deceased_name': 'Lariya Shaji', 'pension_type': 'Widow Pension'}",0.95,76da5ea7-fdbe-4da8-9a3a-cb451e94493d
+apply_pension,"{'district': 'Palakkad', 'panchayath_municipality': 'Palakkad Town Municipality', 'date_of_birth': '19/01/1964', 'aadhar_number': '164532429867', 'mobile_number': '9916751796', 'relative_name': 'Fatima Lavia', 'relative_age': '46', 'relative_aadhar_number': '967489327677'}",0.95,a3dbc580-0e71-4375-9305-fee1c8e5b130
+widow_pension_application,"{'name': 'Fatima Afra', 'district': 'Palakkad', 'panchayath_municipality': 'Al-Aqar Town Municipality', 'date_of_birth': '1961-01-19', 'husband_death_date': '2025-02-14', 'aadhar_number': '967438924672', 'family_members': 3}",0.90,fe5c700d-250a-4ce2-a610-24633bc53779
+Disability pension enquiry,{'nan': 'Fazal Rahman'},0.95,478c6fbf-b5b0-48a3-965c-a242dd1b2bf2

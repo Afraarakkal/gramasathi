@@ -1,0 +1,60 @@
+intent,required_fields,keywords,description
+
+water_complaint,name|ward_number|phone|issue_details,water problem|no water|water supply|കുടിവെള്ളം,Water supply complaint
+water_bill_query,name|consumer_number|ward_number|phone,water bill|bill payment|water charge|ജല ബിൽ,Water bill enquiry
+streetlight_issue,name|ward_number|location|pole_number,street light|light not working|ലൈറ്റ് പ്രശ്നം,Streetlight complaint
+road_damage,name|ward_number|location|damage_details,road damage|road broken|road issue|റോഡ് പ്രശ്നം,Road damage complaint
+drainage_issue,name|ward_number|location|issue_details,drain block|drainage problem|ചാലി തടസം,Drainage complaint
+waste_collection,name|ward_number|complaint_details|phone,garbage issue|waste collection|മാലിന്യം,Garbage complaint
+electricity_issue,name|ward_number|consumer_number|issue_details,electricity problem|power cut|current issue|വൈദ്യുതി പ്രശ്നം,Electricity complaint
+
+widow_pension,name|aadhaar_number|phone,widow pension|വിധവ പെൻഷൻ,Widow pension enquiry
+old_age_pension,name|aadhaar_number|phone,old age pension|വയോജന പെൻഷൻ,Old age pension enquiry
+disability_pension,name|aadhaar_number|phone,disability pension|വികലാംഗ പെൻഷൻ,Disability pension enquiry
+pension_query,name|aadhaar_number|phone,pension|retirement|old age pension|പെൻഷൻ,Pension enquiry
+
+
+birth_certificate_request,name|date_of_birth|father_name|mother_name|phone,birth certificate|ജനന സർട്ടിഫിക്കറ്റ്,Birth certificate request
+death_certificate_request,name|date_of_death|relative_name|phone,death certificate|മരണ സർട്ടിഫിക്കറ്റ്,Death certificate request
+marriage_certificate_request,name|spouse_name|date_of_marriage|phone,marriage certificate|വിവാഹ സർട്ടിഫിക്കറ്റ്,Marriage certificate request
+
+income_certificate_request,name|father_name|dob|gender|aadhaar_number|house_number|village|tehsil|district|state|pin_code|phone|email|purpose|reason|income|financial_year|bank_name|college|course|duration|session|declaration|date|place|signature,income certificate|വരുമാന സർട്ടിഫിക്കറ്റ്|income proof|salary certificate,Income certificate request
+caste_certificate_request,name|aadhaar_number|ward_number|phone,caste certificate|ജാതി സർട്ടിഫിക്കറ്റ്,Caste certificate request
+residence_certificate_request,name|ward_number|aadhaar_number|phone,residence certificate|താമസ സർട്ടിഫിക്കറ്റ്,Residence certificate request
+
+ration_card_issue,name|ration_card_number|ward_number|phone,ration card|റേഷൻ കാർഡ്,Ration card issue
+ration_card_new,name|aadhaar_number|ward_number|phone,new ration card|പുതിയ റേഷൻ കാർഡ്,New ration card request
+
+property_tax_query,name|property_id|ward_number|phone,property tax|tax payment|നികുതി,Property tax enquiry
+property_tax_payment,name|property_id|ward_number|phone,tax receipt|നികുതി രസീത്,Property tax payment
+
+building_permit_query,name|ward_number|property_details|phone,building permit|construction permit|ബിൽഡിംഗ് പെർമിറ്റ്,Building permit enquiry
+building_permit_status,name|application_number|phone,permit status|അപേക്ഷ നില,Building permit status
+
+trade_license_request,name|business_name|ward_number|phone,trade license|ലൈസൻസ്,Trade license request
+trade_license_renewal,name|license_number|phone,license renewal|ലൈസൻസ് പുതുക്കൽ,Trade license renewal
+
+land_tax_query,name|land_number|ward_number|phone,land tax|ഭൂ നികുതി,Land tax enquiry
+
+water_connection_request,name|address|ward_number|phone,new water connection|പുതിയ ജല കണക്ഷൻ,Water connection request
+sewer_connection_request,name|address|ward_number|phone,sewer connection|ചാലി കണക്ഷൻ,Sewer connection request
+
+health_card_query,name|aadhaar_number|phone,health card|ആരോഗ്യ കാർഡ്,Health card enquiry
+school_scholarship_query,name|student_name|aadhaar_number|phone,scholarship|സ്കോളർഷിപ്പ്,Scholarship enquiry
+farm_subsidy_query,name|aadhaar_number|land_details|phone,farm subsidy|കർഷക സഹായം,Farm subsidy enquiry
+
+self_help_group_query,name|group_name|ward_number|phone,self help group|SHG|കുടുംബശ്രീ,Self help group enquiry
+anganwadi_query,name|child_name|ward_number|phone,anganwadi|അങ്കൻവാടി,Anganwadi enquiry
+
+public_toilet_issue,name|location|ward_number|issue_details,toilet problem|പൊതു ശൗചാലയം,Public toilet complaint
+bus_stop_issue,name|location|ward_number|issue_details,bus stop problem|ബസ് സ്റ്റോപ്പ്,Bus stop complaint
+cemetery_issue,name|location|ward_number|issue_details,burial ground|ശ്മശാനം,Cemetery issue
+
+tree_cutting_permission,name|location|ward_number|reason,tree cutting|മരം വെട്ടൽ,Tree cutting permission
+street_name_request,name|ward_number|location|phone,street naming|റോഡ് പേര്,Street naming request
+
+complaint_general,name|ward_number|complaint_details|phone,general complaint|പരാതി,General complaint
+document_status_query,name|application_number|phone,application status|അപേക്ഷ നില,Document status enquiry
+
+employment_registration,name|aadhaar_number|phone,employment registration|തൊഴിൽ രജിസ്ട്രേഷൻ,Employment registration
+job_card_query,name|job_card_number|phone,job card|MNREGA|ജോബ് കാർഡ്,Job card enquiry
